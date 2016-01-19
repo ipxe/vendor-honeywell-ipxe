@@ -687,6 +687,7 @@ static int smsc95xx_dump_statistics ( struct smsc95xx_device *smsc95xx ) {
  */
 static int smsc95xx_reset ( struct smsc95xx_device *smsc95xx ) {
 	uint32_t hw_cfg;
+	uint32_t led_gpio_cfg;
 	int rc;
 
 	/* Reset device */
@@ -704,6 +705,17 @@ static int smsc95xx_reset ( struct smsc95xx_device *smsc95xx ) {
 	if ( hw_cfg & SMSC95XX_HW_CFG_LRST ) {
 		DBGC ( smsc95xx, "SMSC95XX %p failed to reset\n", smsc95xx );
 		return -ETIMEDOUT;
+	}
+
+	/* Configure LEDs */
+	led_gpio_cfg = ( SMSC95XX_LED_GPIO_CFG_GPCTL2_NSPD_LED |
+			 SMSC95XX_LED_GPIO_CFG_GPCTL1_NLNKA_LED |
+			 SMSC95XX_LED_GPIO_CFG_GPCTL0_NFDX_LED );
+	if ( ( rc = smsc95xx_writel ( smsc95xx, SMSC95XX_LED_GPIO_CFG,
+				      led_gpio_cfg ) ) != 0 ) {
+		DBGC ( smsc95xx, "SMSC95XX %p could not configure LEDs: %s\n",
+		       smsc95xx, strerror ( rc ) );
+		/* Ignore error and continue */
 	}
 
 	return 0;
@@ -1128,9 +1140,12 @@ static int smsc95xx_probe ( struct usb_function *func,
 	smsc95xx->netdev = netdev;
 	usbnet_init ( &smsc95xx->usbnet, func, &smsc95xx_intr_operations,
 		      &smsc95xx_in_operations, &smsc95xx_out_operations );
-	usb_refill_init ( &smsc95xx->usbnet.intr, 0, SMSC95XX_INTR_MAX_FILL );
-	usb_refill_init ( &smsc95xx->usbnet.in, SMSC95XX_IN_MTU,
-			  SMSC95XX_IN_MAX_FILL );
+	usb_refill_init ( &smsc95xx->usbnet.intr, 0, 0,
+			  SMSC95XX_INTR_MAX_FILL );
+	usb_refill_init ( &smsc95xx->usbnet.in,
+			  ( sizeof ( struct smsc95xx_tx_header ) -
+			    sizeof ( struct smsc95xx_rx_header ) ),
+			  SMSC95XX_IN_MTU, SMSC95XX_IN_MAX_FILL );
 	mii_init ( &smsc95xx->mii, &smsc95xx_mii_operations );
 	DBGC ( smsc95xx, "SMSC95XX %p on %s\n", smsc95xx, func->name );
 
