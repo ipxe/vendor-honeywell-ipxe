@@ -185,6 +185,10 @@ FILE_LICENCE ( GPL2_OR_LATER_OR_UBDL );
 #define ERRFILE_intelxvf	     ( ERRFILE_DRIVER | 0x00790000 )
 #define ERRFILE_smsc95xx	     ( ERRFILE_DRIVER | 0x007a0000 )
 #define ERRFILE_acm		     ( ERRFILE_DRIVER | 0x007b0000 )
+#define ERRFILE_eoib		     ( ERRFILE_DRIVER | 0x007c0000 )
+#define ERRFILE_golan		     ( ERRFILE_DRIVER | 0x007d0000 )
+#define ERRFILE_flexboot_nodnic	     ( ERRFILE_DRIVER | 0x007e0000 )
+#define ERRFILE_virtio_pci	     ( ERRFILE_DRIVER | 0x007f0000 )
 
 #define ERRFILE_aoe			( ERRFILE_NET | 0x00000000 )
 #define ERRFILE_arp			( ERRFILE_NET | 0x00010000 )
@@ -258,6 +262,7 @@ FILE_LICENCE ( GPL2_OR_LATER_OR_UBDL );
 #define ERRFILE_peerdisc		( ERRFILE_NET | 0x00450000 )
 #define ERRFILE_peerblk			( ERRFILE_NET | 0x00460000 )
 #define ERRFILE_peermux			( ERRFILE_NET | 0x00470000 )
+#define ERRFILE_xsigo			( ERRFILE_NET | 0x00480000 )
 
 #define ERRFILE_image		      ( ERRFILE_IMAGE | 0x00000000 )
 #define ERRFILE_elf		      ( ERRFILE_IMAGE | 0x00010000 )
@@ -345,6 +350,8 @@ FILE_LICENCE ( GPL2_OR_LATER_OR_UBDL );
 #define ERRFILE_efi_pxe		      ( ERRFILE_OTHER | 0x004a0000 )
 #define ERRFILE_efi_usb		      ( ERRFILE_OTHER | 0x004b0000 )
 #define ERRFILE_efi_fbcon	      ( ERRFILE_OTHER | 0x004c0000 )
+#define ERRFILE_efi_local	      ( ERRFILE_OTHER | 0x004d0000 )
+#define ERRFILE_efi_entropy	      ( ERRFILE_OTHER | 0x004e0000 )
 
 /** @} */
 

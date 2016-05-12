@@ -491,6 +491,11 @@ LDFLAGS		+= -static
 #
 CFLAGS		+= -include include/compiler.h
 
+# The section type character (e.g. "@" in "@progbits") varies by
+# architecture.
+#
+CFLAGS		+= -DASM_TCHAR='$(ASM_TCHAR)' -DASM_TCHAR_OPS='$(ASM_TCHAR_OPS)'
+
 # CFLAGS for specific object types
 #
 CFLAGS_c	+=
@@ -896,7 +901,7 @@ endif
 # Device ID tables (using IDs from ROM definition file)
 #
 define obj_pci_id_asm
-	.section ".pci_devlist.$(1)", "a", @progbits
+	.section ".pci_devlist.$(1)", "a", $(ASM_TCHAR)progbits
 	.globl pci_devlist_$(1)
 pci_devlist_$(1):
 	.short ( 0x$(1) & 0xffff )
@@ -1298,21 +1303,15 @@ CLEANUP += $(ZBIN)
 #
 # The EFI image converter
 #
-ELF2EFI_CFLAGS	:= -I$(BINUTILS_DIR)/include -I$(BFD_DIR)/include \
-		   -I$(ZLIB_DIR)/include -idirafter include
-ELF2EFI_LDFLAGS	:= -L$(BINUTILS_DIR)/lib -L$(BFD_DIR)/lib -L$(ZLIB_DIR)/lib \
-		   -lbfd -ldl -lz -Wl,--no-warn-search-mismatch
 
 $(ELF2EFI32) : util/elf2efi.c $(MAKEDEPS)
 	$(QM)$(ECHO) "  [HOSTCC] $@"
-	$(Q)$(HOST_CC) $(HOST_CFLAGS) $(ELF2EFI_CFLAGS) -DEFI_TARGET_IA32 $< \
-		$(ELF2EFI_LDFLAGS) -o $@
+	$(Q)$(HOST_CC) $(HOST_CFLAGS) -idirafter include -DEFI_TARGET32 $< -o $@
 CLEANUP += $(ELF2EFI32)
 
 $(ELF2EFI64) : util/elf2efi.c $(MAKEDEPS)
 	$(QM)$(ECHO) "  [HOSTCC] $@"
-	$(Q)$(HOST_CC) $(HOST_CFLAGS) $(ELF2EFI_CFLAGS) -DEFI_TARGET_X64 $< \
-		$(ELF2EFI_LDFLAGS) -o $@
+	$(Q)$(HOST_CC) $(HOST_CFLAGS) -idirafter include -DEFI_TARGET64 $< -o $@
 CLEANUP += $(ELF2EFI64)
 
 $(EFIROM) : util/efirom.c $(MAKEDEPS)
