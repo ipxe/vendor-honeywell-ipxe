@@ -287,19 +287,19 @@ static int smsc95xx_fetch_mac_eeprom ( struct smsc95xx_device *smsc95xx,
 }
 
 /**
- * Construct MAC address for Honeywell VM3
+ * Construct MAC address for Honeywell VMx
  *
  * @v smsc95xx		SMSC95xx device
  * @v hw_addr		Hardware address to fill in
  * @ret rc		Return status code
  */
-static int smsc95xx_fetch_mac_vm3 ( struct smsc95xx_device *smsc95xx,
+static int smsc95xx_fetch_mac_vmx ( struct smsc95xx_device *smsc95xx,
 				    uint8_t *hw_addr ) {
 	struct smbios_structure structure;
 	struct smbios_system_information system;
 	struct {
 		char manufacturer[ 10 /* "Honeywell" + NUL */ ];
-		char product[ 4 /* "VM3" + NUL */ ];
+		char product[ 4 /* "VMx" + NUL */ ];
 		char mac[ base16_encoded_len ( ETH_ALEN ) + 1 /* NUL */ ];
 	} strings;
 	int len;
@@ -345,9 +345,9 @@ static int smsc95xx_fetch_mac_vm3 ( struct smsc95xx_device *smsc95xx,
 		return rc;
 	}
 
-	/* Ignore non-VM3 devices */
+	/* Ignore non-VMx devices */
 	if ( ( strcmp ( strings.manufacturer, "Honeywell" ) != 0 ) ||
-	     ( strcmp ( strings.product, "VM3" ) != 0 ) )
+	     ( strncmp ( strings.product, "VM", 2 ) != 0 ) )
 		return -ENOTTY;
 
 	/* Find OEM strings */
@@ -359,7 +359,7 @@ static int smsc95xx_fetch_mac_vm3 ( struct smsc95xx_device *smsc95xx,
 	}
 
 	/* Fetch MAC address */
-	len = read_smbios_string ( &structure, SMSC95XX_VM3_OEM_STRING_MAC,
+	len = read_smbios_string ( &structure, SMSC95XX_VMX_OEM_STRING_MAC,
 				   strings.mac, ( sizeof ( strings.mac ) - 1 ));
 	if ( len < 0 ) {
 		rc = len;
@@ -384,7 +384,7 @@ static int smsc95xx_fetch_mac_vm3 ( struct smsc95xx_device *smsc95xx,
 		return rc;
 	}
 
-	DBGC ( smsc95xx, "SMSC95XX %p using VM3 MAC %s\n",
+	DBGC ( smsc95xx, "SMSC95XX %p using VMx MAC %s\n",
 	       smsc95xx, eth_ntoa ( hw_addr ) );
 	return 0;
 }
@@ -404,8 +404,8 @@ static int smsc95xx_fetch_mac ( struct smsc95xx_device *smsc95xx,
 	if ( ( rc = smsc95xx_fetch_mac_eeprom ( smsc95xx, hw_addr ) ) == 0 )
 		return 0;
 
-	/* Construct MAC address for Honeywell VM3, if applicable */
-	if ( ( rc = smsc95xx_fetch_mac_vm3 ( smsc95xx, hw_addr ) ) == 0 )
+	/* Construct MAC address for Honeywell VMx, if applicable */
+	if ( ( rc = smsc95xx_fetch_mac_vmx ( smsc95xx, hw_addr ) ) == 0 )
 		return 0;
 
 	/* Otherwise, generate a random MAC address */
